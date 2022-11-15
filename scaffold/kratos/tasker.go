@@ -14,10 +14,14 @@ type TaskOptions struct {
 	EnableRecovery bool
 }
 
+type Task interface {
+	Run()
+}
+
 type TaskFunc struct {
 	Name           string
 	Desc           string
-	task           func()
+	task           Task
 	timeout        time.Duration
 	enableRecovery bool
 }
@@ -33,7 +37,7 @@ func NewTaskerManager() *TaskerManager {
 	}
 }
 
-func (t *TaskerManager) AddFunc(name string, desc string, task func(), opts ...TaskOptions) {
+func (t *TaskerManager) AddFunc(name string, desc string, task Task, opts ...TaskOptions) {
 	if t.tasks == nil {
 		t.tasks = make(map[string]TaskFunc)
 	}
@@ -83,7 +87,7 @@ func (t *TaskerManager) Run(name string) error {
 		}
 
 		// 执行任务
-		task.task()
+		task.task.Run()
 
 		// 任务结束
 		log.Printf("执行结束, 本次任务耗时 %.2f 秒", time.Since(start).Seconds())
