@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package api.kerrs;
+
+option go_package = "api/kerrs; kerrs";
+option java_multiple_files = true;
+option java_package = "api.kerrs";
+
+import "errors/errors.proto";
+
+enum ErrorReason {
+  NOT_FOUND = 0 [(errors.code) = 404];
+  INVALID_PARAMS = 1 [(errors.code) = 400];
+  UN_AUTHORIZATION = 2 [(errors.code) = 401];
+  UN_KNOW = 3 [(errors.code) = 500];
+  INVALID_OPERATION = 4 [(errors.code) = 400];
+  TOO_MANY_REQUEST = 5 [(errors.code) = 429];
+}
