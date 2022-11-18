@@ -85,6 +85,6 @@ func FromAuthContext(ctx context.Context) (*AuthCredential, error) {
 	return &credential, nil
 }
 
-func WrapErrForKratos(err error) error {
+func WrapAuthErrForKratos(err error) error {
 	return kerrs.Unauthorized("UNAUTHORIZED", err.Error())
 }
