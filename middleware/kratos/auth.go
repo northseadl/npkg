@@ -106,7 +106,7 @@ func FromAuthContext(ctx context.Context) (*AuthCredential, error) {
 	return &credential, nil
 }
 
-func WithPermsContext(ctx context.Context, perms []string) error {
+func WithPermsContext(ctx context.Context, perms ...string) error {
 	if len(perms) == 0 {
 		return nil
 	}
