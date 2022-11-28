@@ -2,7 +2,6 @@ package kratos
 
 import (
 	"context"
-	"errors"
 	kerrs "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -75,7 +74,8 @@ func AuthPermsMiddleware(opts AuthPermsMatchOptions) middleware.Middleware {
 	}
 }
 
-var ErrMissAuthCredential = errors.New("miss auth credential")
+var ErrMissAuthCredential = kerrs.Unauthorized("UNAUTHORIZED", "缺少访问凭证")
+var ErrPermissionNotAllowed = kerrs.Forbidden("PERMISSION_NOT_ALLOWED", "权限不允许")
 
 func FromAuthContext(ctx context.Context) (*AuthCredential, error) {
 	credential, ok := ctx.Value(Credential{}).(AuthCredential)
@@ -85,6 +85,22 @@ func FromAuthContext(ctx context.Context) (*AuthCredential, error) {
 	return &credential, nil
 }
 
+func WithPermsContext(ctx context.Context, perms []string) error {
+	if len(perms) == 0 {
+		return nil
+	}
+	credential, err := FromAuthContext(ctx)
+	if err != nil {
+		return err
+	}
+	if slices.Contains(credential.Perms, perms...) {
+		return nil
+	} else {
+		return ErrPermissionNotAllowed
+	}
+}
+
+// Deprecated: Deprecated
 func WrapAuthErrForKratos(err error) error {
 	return kerrs.Unauthorized("UNAUTHORIZED", err.Error())
 }
