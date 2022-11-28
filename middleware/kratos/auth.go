@@ -47,7 +47,26 @@ func NewAuthPermMatchBuilder() AuthPermMatchBuilder {
 	}
 }
 
-// AuthPermsMiddleware Metadata权限匹配器
+// AuthMiddleware Metadata权限
+func AuthMiddleware() middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (interface{}, error) {
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				uid := tr.RequestHeader().Get("x-auth-uid")
+				perms := strings.Split(tr.RequestHeader().Get("x-auth-perms"), ",")
+				if uid != "" {
+					ctx = context.WithValue(ctx, Credential{}, AuthCredential{
+						Uid:   uid,
+						Perms: perms,
+					})
+				}
+			}
+			return handler(ctx, req)
+		}
+	}
+}
+
+// AuthPermsMiddleware Metadata权限 + 匹配
 func AuthPermsMiddleware(opts AuthPermsMatchOptions) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -55,10 +74,12 @@ func AuthPermsMiddleware(opts AuthPermsMatchOptions) middleware.Middleware {
 				uid := tr.RequestHeader().Get("x-auth-uid")
 				perms := strings.Split(tr.RequestHeader().Get("x-auth-perms"), ",")
 
-				op := tr.Operation()
-				if opPerms, ok2 := opts[op]; ok2 {
-					if !slices.Contains(perms, opPerms...) {
-						return nil, kerrs.Unauthorized("PERMISSION_DENIED", "权限不足")
+				if opts != nil && len(opts) > 0 {
+					op := tr.Operation()
+					if opPerms, ok2 := opts[op]; ok2 {
+						if !slices.Contains(perms, opPerms...) {
+							return nil, ErrPermissionNotAllowed
+						}
 					}
 				}
 
