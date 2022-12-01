@@ -12,8 +12,8 @@ type CliManager[T any] struct {
 	provider *T
 }
 
-func NewCli[T any](provider *T) CliManager[T] {
-	return CliManager[T]{
+func NewCli[T any](provider *T) *CliManager[T] {
+	return &CliManager[T]{
 		app:      cli.NewApp(),
 		provider: provider,
 	}
