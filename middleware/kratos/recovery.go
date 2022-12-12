@@ -20,7 +20,7 @@ func RecoveryZeroMiddleware(logger log.Logger) func(handler middleware.Handler) 
 			defer func() {
 				if rerr := recover(); rerr != nil {
 					if _, ok := rerr.(stackTracer); !ok {
-						rerr = errors.WithStack(err)
+						rerr = errors.WithStack(rerr.(error))
 					}
 					h.WithContext(ctx).Errorw("req", req, "err", rerr)
 					err = ErrUnknownRequest
