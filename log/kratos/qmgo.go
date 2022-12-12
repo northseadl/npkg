@@ -11,8 +11,8 @@ func (l *DebugLogger) Debug(msg string) error {
 	return nil
 }
 
-func NewDebugLogger(logger log.Logger) DebugLogger {
-	return DebugLogger{
+func NewDebugLogger(logger log.Logger) *DebugLogger {
+	return &DebugLogger{
 		h: log.NewHelper(logger),
 	}
 }
